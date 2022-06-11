@@ -26,8 +26,10 @@ if __name__ == '__main__':
     BOX_SIGMA = 3
 
     # define shortcuts for symbols
-    X = lambda i: int(gtsam.symbol(ord('x'), i))
-    Q = lambda i: int(gtsam.symbol(ord('q'), i))
+    #X = lambda i: int(gtsam.symbol(ord('x'), i))
+    #Q = lambda i: int(gtsam.symbol(ord('q'), i))
+    X = lambda i: int(gtsam.symbol('x', i))
+    Q = lambda i: int(gtsam.symbol('q', i))
 
     # create empty graph / estimate
     graph = gtsam.NonlinearFactorGraph()
@@ -37,17 +39,17 @@ if __name__ == '__main__':
     calibration = gtsam.Cal3_S2(525.0, 525.0, 0.0, 160.0, 120.0)
 
     # define noise models
-    prior_noise = gtsam.noiseModel_Diagonal.Sigmas(np.array([1e-1]*6, dtype=np.float))
-    odometry_noise = gtsam.noiseModel_Diagonal.Sigmas(np.array([ODOM_SIGMA]*3 + [ODOM_SIGMA]*3, dtype=np.float))
-    bbox_noise = gtsam.noiseModel_Diagonal.Sigmas(np.array([BOX_SIGMA]*4, dtype=np.float))
+    prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([1e-1]*6, dtype=np.float))
+    odometry_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([ODOM_SIGMA]*3 + [ODOM_SIGMA]*3, dtype=np.float))
+    bbox_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([BOX_SIGMA]*4, dtype=np.float))
 
     # define poses 
     poses = []
-    poses.append(gtsam.SimpleCamera.Lookat(gtsam.Point3(10,0,0), gtsam.Point3(), gtsam.Point3(0,0,1)).pose())
-    poses.append(gtsam.SimpleCamera.Lookat(gtsam.Point3(0,-10,0), gtsam.Point3(), gtsam.Point3(0,0,1)).pose())
-    poses.append(gtsam.SimpleCamera.Lookat(gtsam.Point3(-10,0,0), gtsam.Point3(), gtsam.Point3(0,0,1)).pose())
-    poses.append(gtsam.SimpleCamera.Lookat(gtsam.Point3(0,10,0), gtsam.Point3(), gtsam.Point3(0,0,1)).pose())
-    poses.append(gtsam.SimpleCamera.Lookat(gtsam.Point3(10,0,0), gtsam.Point3(), gtsam.Point3(0,0,1)).pose())
+    poses.append(gtsam.PinholeCameraCal3_S2.Lookat(gtsam.Point3(10,0,0), gtsam.Point3(), gtsam.Point3(0,0,1), gtsam.Cal3_S2()).pose())
+    poses.append(gtsam.PinholeCameraCal3_S2.Lookat(gtsam.Point3(0,-10,0), gtsam.Point3(), gtsam.Point3(0,0,1), gtsam.Cal3_S2()).pose())
+    poses.append(gtsam.PinholeCameraCal3_S2.Lookat(gtsam.Point3(-10,0,0), gtsam.Point3(), gtsam.Point3(0,0,1), gtsam.Cal3_S2()).pose())
+    poses.append(gtsam.PinholeCameraCal3_S2.Lookat(gtsam.Point3(0,10,0), gtsam.Point3(), gtsam.Point3(0,0,1), gtsam.Cal3_S2()).pose())
+    poses.append(gtsam.PinholeCameraCal3_S2.Lookat(gtsam.Point3(10,0,0), gtsam.Point3(), gtsam.Point3(0,0,1), gtsam.Cal3_S2()).pose())
 
     # define quadrics
     quadrics = []
