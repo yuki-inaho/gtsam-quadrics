@@ -335,14 +335,14 @@ def initialize_quadric(depth, box, camera_pose, calibration, object_depth=0.1):
 
     # compute the 3D point corrosponding to the box center 
     center = box.center()
-    x = (center.x() - calibration.px()) * box_depth / calibration.fx()
-    y = (center.y() - calibration.py()) * box_depth / calibration.fy()
+    x = (center[0] - calibration.px()) * box_depth / calibration.fx()
+    y = (center[1] - calibration.py()) * box_depth / calibration.fy()
     relative_point = gtsam.Point3(x, y, box_depth)
     quadric_center = camera_pose.transformFrom(relative_point)
 
     # compute quadric rotation using .Lookat
     up_vector = camera_pose.transformFrom(gtsam.Point3(0,-1,0))
-    quadric_rotation = gtsam.SimpleCamera.Lookat(camera_pose.translation(), quadric_center, up_vector).pose().rotation()
+    quadric_rotation = gtsam.PinholeCameraCal3_S2.Lookat(camera_pose.translation(), quadric_center, up_vector, gtsam.Cal3_S2()).pose().rotation()
     quadric_pose = gtsam.Pose3(quadric_rotation, quadric_center)
 
     # compute the quadric radii from the box shape
@@ -391,13 +391,13 @@ if __name__ == '__main__':
     isam = gtsam.ISAM2(params)
 
     # declare symbol shortcuts
-    X = lambda i: int(gtsam.symbol(ord('x'), i))
-    Q = lambda i: int(gtsam.symbol(ord('q'), i))
+    X = lambda i: int(gtsam.symbol('x', i))
+    Q = lambda i: int(gtsam.symbol('q', i))
 
     # declare noise models
-    odom_noise = gtsam.noiseModel_Diagonal.Sigmas(np.array([0.1]*6, dtype=np.float))
-    box_noise = gtsam.noiseModel_Diagonal.Sigmas(np.array([60]*4, dtype=np.float))
-    pose_prior_noise = gtsam.noiseModel_Diagonal.Sigmas(np.array([0.00001]*6, dtype=np.float))
+    odom_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.1]*6, dtype=np.float))
+    box_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([60]*4, dtype=np.float))
+    pose_prior_noise = gtsam.noiseModel.Diagonal.Sigmas(np.array([0.00001]*6, dtype=np.float))
 
     # create local graph and estimate (cleared when we update isam)
     local_graph = gtsam.NonlinearFactorGraph()
@@ -524,8 +524,8 @@ if __name__ == '__main__':
         local_estimate.clear()
 
         # update the estimated quadrics and trajectory
-        for i in range(estimate.keys().size()):
-            key = estimate.keys().at(i)
+        for i in range(len(estimate.keys())):
+            key = estimate.keys()[i]
             if chr(gtsam.symbolChr(key)) == 'q':
                 quadric = gtsam_quadrics.ConstrainedDualQuadric.getFromValues(estimate, key)
                 current_quadrics[gtsam.symbolIndex(key)] = quadric

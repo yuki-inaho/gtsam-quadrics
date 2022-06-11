@@ -104,7 +104,7 @@ class CV2Drawing(object):
 
     def generate_uv_spherical(self, quadric, pose, calibration, theta_points=30, phi_points=30):
         rotation = quadric.pose().rotation().matrix()
-        translation = quadric.pose().translation().vector()
+        translation = quadric.pose().translation()
 
         # Radii corresponding to the coefficients:
         rx, ry, rz = quadric.radii()
