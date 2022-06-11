@@ -70,9 +70,9 @@ int main(void) {
     trajectory.push_back(gtsam::CalibratedCamera::LookatPose(Point3(10,0,0), Point3(), Point3(0,0,1)));
 
     // define quadrics
-    vector<ConstrainedDualQuadric> quadrics;
-    quadrics.push_back(ConstrainedDualQuadric(Pose3(), Vector3(1.,2.,3.)));
-    quadrics.push_back(ConstrainedDualQuadric(Pose3(Rot3(), Point3(0.1,0.1,0.1)), Vector3(1.,2.,3.)));
+    vector<gtsam_quadrics::ConstrainedDualQuadric> quadrics;
+    quadrics.push_back(gtsam_quadrics::ConstrainedDualQuadric(Pose3(), Vector3(1.,2.,3.)));
+    quadrics.push_back(gtsam_quadrics::ConstrainedDualQuadric(Pose3(Rot3(), Point3(0.1,0.1,0.1)), Vector3(1.,2.,3.)));
 
     // add prior on first pose
     PriorFactor<Pose3> priorFactor(Symbol('x',0), trajectory[0], priorNoiseModel);
@@ -101,9 +101,9 @@ int main(void) {
     // reproject true quadrics into each true pose
     for (unsigned j = 0; j < quadrics.size(); j++) {
         for (unsigned i = 0; i < trajectory.size(); i++) {
-            DualConic conic = QuadricCamera::project(quadrics[j], trajectory[i], calibration);
-            AlignedBox2 bounds = conic.bounds();
-            BoundingBoxFactor bbf(bounds, calibration, Symbol('x', i), Symbol('q', j), boxNoiseModel);
+            gtsam_quadrics::DualConic conic = gtsam_quadrics::QuadricCamera::project(quadrics[j], trajectory[i], calibration);
+            gtsam_quadrics::AlignedBox2 bounds = conic.bounds();
+            gtsam_quadrics::BoundingBoxFactor bbf(bounds, calibration, Symbol('x', i), Symbol('q', j), boxNoiseModel);
             graph.add(bbf);
         }
     }
