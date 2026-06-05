@@ -1,6 +1,7 @@
 // Include relevant boost libraries required by GTSAM
 {include_boost}
 
+#include <cstdint>
 #include <pybind11/eigen.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/pybind11.h>
@@ -49,4 +50,3 @@ namespace py = pybind11;
 // #include "python/gtsam/specializations/{module_name}.h"
 
 }}
-

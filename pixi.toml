@@ -1,0 +1,30 @@
+[workspace]
+name = "gtsam-quadrics"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+license-file = "LICENSE.txt"
+readme = "README.md"
+
+[dependencies]
+python = ">=3.9,<3.11"
+cmake = ">=3.18,<4"
+ninja = "*"
+pkg-config = "*"
+c-compiler = "*"
+cxx-compiler = "*"
+boost-cpp = ">=1.74,<1.82"
+metis = "*"
+pip = "*"
+setuptools = "*"
+wheel = "*"
+pyparsing = "*"
+numpy = ">=1.20,<2"
+
+[tasks]
+clean = "cmake -E remove_directory build"
+configure = "cmake -S . -B build -G Ninja -DBUILD_PYTHON_WRAP=ON -DGTSAM_BUILD_EXAMPLES_ALWAYS=OFF -DCMAKE_PREFIX_PATH=$CONDA_PREFIX"
+build = { cmd = "cmake --build build --target gtsam_py gtsam_quadrics gtsam_quadrics_py", depends-on = ["configure"] }
+check = { cmd = "cmake --build build --target check", depends-on = ["build"] }
+cmake-install = { cmd = "cmake --install build", depends-on = ["build"] }
+install-python = "CMAKE_PREFIX_PATH=$CONDA_PREFIX python -m pip install --no-build-isolation ."
+install-python-editable = "CMAKE_PREFIX_PATH=$CONDA_PREFIX python -m pip install --no-build-isolation -e ."

@@ -23,8 +23,9 @@ GTSAM Quadrics contains both C++ libraries, and Python wrappers for use in Pytho
 Python wrappers can be installed via one of the following options:
 
 1. [Through our Conda package](#conda): single command installs everything including system dependencies (recommended)
-2. [Through our pip package](#pip): single command installs GTSAM and GTSAM Quadrics Python modules and Python dependences, but you take care of system dependencies
-3. [Directly from source](#from-source): allows easy editing and extension of our code, but you take care of building and all dependencies
+2. [Through Pixi](#pixi): reproducible source-build environment for Python, CMake, compilers, Boost, and METIS
+3. [Through our pip package](#pip): single command installs GTSAM and GTSAM Quadrics Python modules and Python dependences, but you take care of system dependencies
+4. [Directly from source](#from-source): allows easy editing and extension of our code, but you take care of building and all dependencies
 
 Or you can use the C++ libraries directly by:
 
@@ -36,6 +37,8 @@ Please note that for all methods except the Conda method, you must have the foll
 - CMake >= 3.0: `sudo apt install cmake`
 - Boost C++ libraries >= 1.65: `sudo apt install libboost-all-dev`
 - METIS matrix library: `sudo apt install libmetis-dev` <!-- in future, automatically get from gtsam/3rdparty, required when including gtsam/Symbol.h etc, maybe we just need to update some path? -->
+
+The Pixi method below also manages these build dependencies inside the project environment, so you do not need to install the Ubuntu packages separately when using Pixi.
 
 ### Conda
 
@@ -55,6 +58,39 @@ conda install gtsam_quadrics
 ```
 
 You can see a list of our Conda dependencies in [the feedstock recipe for GTSAM Quadrics](https://github.com/conda-forge/gtsam-quadrics-feedstock/blob/master/recipe/meta.yaml).
+
+### Pixi
+
+Pixi provides a reproducible development and source-build environment for this repository. The included `pixi.toml` pins the environment to `conda-forge` and installs Python, CMake, Ninja, C/C++ compilers, Boost, METIS, and the Python build tools used by `setup.py`. The Pixi environment currently constrains Python to versions below 3.11 because the bundled GTSAM `pybind11` copy is not compatible with Python 3.11's frame API.
+
+Clone the repository with the `gtsam` submodule initialised:
+
+```
+git clone --recurse-submodules https://github.com/best-of-acrv/gtsam-quadrics
+cd gtsam-quadrics
+```
+
+Install the Python package from the local source tree:
+
+```
+pixi run install-python
+```
+
+For editable development installs, use:
+
+```
+pixi run install-python-editable
+```
+
+You can also drive the CMake build directly through Pixi tasks:
+
+```
+pixi run configure
+pixi run build
+pixi run check
+```
+
+The Pixi build task builds the GTSAM Python module, the core GTSAM Quadrics C++ library, and the GTSAM Quadrics Python extension. The tasks pass the active environment prefix to CMake with `CMAKE_PREFIX_PATH=$CONDA_PREFIX`, which helps CMake find Boost and METIS from the Pixi environment instead of system paths.
 
 ### Pip
 

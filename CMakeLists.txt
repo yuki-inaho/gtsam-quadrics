@@ -1,14 +1,21 @@
-project(gtsam_quadrics)
 cmake_minimum_required(VERSION 3.18)
+project(gtsam_quadrics)
 set(GTSAM_QUADRICS_VERSION_STRING 0.1.2)
 
 # we want to use some C++11 features
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-copy -Wno-unused-parameter")
+endif()
 
 ###################################################################################
 # set up options
 option(BUILD_PYTHON_WRAP "Enable/Disable building of cython wrapper" ON)
+option(BUILD_DOCS "Enable/Disable building of doxygen docs" ON)
 set(PYTHON_VERSION "3" CACHE STRING "The version of python to build the cython wrapper for (or Default)")
+if (BUILD_PYTHON_WRAP AND NOT DEFINED CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
+endif()
 
 ###################################################################################
 # Explicitly include GTSAM
@@ -26,7 +33,19 @@ if (BUILD_PYTHON_WRAP)
   find_package(Python3 COMPONENTS Interpreter Development.Module)
 endif()
 set(GTSAM_BUILD_UNSTABLE OFF CACHE BOOL "")
+set(GTSAM_BUILD_DOCS OFF CACHE BOOL "Enable/Disable building of GTSAM doxygen docs")
+set(GTSAM_BUILD_EXAMPLES_ALWAYS OFF CACHE BOOL "Build examples with 'make all'")
+set(GTSAM_BUILD_WITH_CCACHE OFF CACHE BOOL "Use ccache compiler cache")
+set(GTSAM_BUILD_WITH_MARCH_NATIVE OFF CACHE BOOL "Build with native architecture instructions")
 add_subdirectory(./gtsam)
+
+if (BUILD_PYTHON_WRAP AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  if (TARGET gtsam_py)
+    target_compile_options(gtsam_py PRIVATE -include cstdint -fno-lto)
+    target_link_options(gtsam_py PRIVATE -fno-lto)
+    set_target_properties(gtsam_py PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
+  endif()
+endif()
 
 ###################################################################################
 # Add Python wrapping tools from gtwrap (used in GTSAM 4.1+)
@@ -122,15 +141,22 @@ if(BUILD_PYTHON_WRAP)
     )
 
   set_target_properties(${PROJECT_NAME}_py PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")
+  if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(${PROJECT_NAME}_py PRIVATE -include cstdint -fno-lto)
+    target_link_options(${PROJECT_NAME}_py PRIVATE -fno-lto)
+    set_target_properties(${PROJECT_NAME}_py PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
+  endif()
 endif()
 
 ###################################################################################
 # Build Doxygen documentation
 
-# find doxygen
-find_package(Doxygen)
+if (BUILD_DOCS)
+  # find doxygen
+  find_package(Doxygen)
 
-# add subdirectory with custom make doc, doc_clean targets
-if (DOXYGEN_FOUND)
-  add_subdirectory(doc)
+  # add subdirectory with custom make doc, doc_clean targets
+  if (DOXYGEN_FOUND)
+    add_subdirectory(doc)
+  endif()
 endif()
