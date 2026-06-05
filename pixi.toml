@@ -19,6 +19,7 @@ setuptools = "*"
 wheel = "*"
 pyparsing = "*"
 numpy = ">=1.20,<2"
+opencv = "*"
 
 [tasks]
 clean = "cmake -E remove_directory build"

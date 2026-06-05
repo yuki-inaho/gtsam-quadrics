@@ -28,3 +28,5 @@ ros/src/py_detector/py_detector/weights/yolov3.weights
 compile_commands.json
 
 .pixi/
+
+outputs/
