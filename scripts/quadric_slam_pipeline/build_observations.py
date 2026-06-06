@@ -54,6 +54,7 @@ def _colmap_frames(colmap_model: ColmapTextModel | None) -> dict[int, dict[str, 
             "file_name": image.file_name,
             "camera_id": image.camera_id,
             "registered": True,
+            "pose_source": image.pose_source,
             "cam_from_world": {
                 "qvec": list(image.qvec_wxyz),
                 "tvec": list(image.tvec),
@@ -73,6 +74,14 @@ def _depth_by_track(tracking: TrackingCocoData) -> dict[int, float]:
         if depth is not None:
             depths[int(key)] = float(depth)
     return depths
+
+
+def _pose_source_counts(frames: dict[int, dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for frame in frames.values():
+        source = str(frame.get("pose_source") or "unknown")
+        counts[source] = counts.get(source, 0) + 1
+    return counts
 
 
 def build_observations_dataset(
@@ -125,6 +134,7 @@ def build_observations_dataset(
             "tracks": len(track_counts),
             "frames": len(frames),
             "dropped_unregistered_measurements": dropped_unregistered,
+            "pose_source_counts": _pose_source_counts(frames),
         },
         "frames": [frames[key] for key in sorted(frames)],
         "tracks": [

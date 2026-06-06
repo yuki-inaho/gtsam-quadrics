@@ -145,6 +145,8 @@ class TrackingObservationsTest(unittest.TestCase):
         self.assertEqual(dataset["camera"]["params"], [553.0, 560.0, 412.0, 294.0])
         self.assertEqual([frame["frame_id"] for frame in dataset["frames"]], [1, 3])
         self.assertEqual(dataset["frames"][0]["cam_from_world"]["qvec"], [1.0, 0.0, 0.0, 0.0])
+        self.assertEqual(dataset["frames"][0]["pose_source"], "colmap")
+        self.assertEqual(dataset["summary"]["pose_source_counts"], {"colmap": 2})
         self.assertEqual(dataset["tracks"], [{"track_id": 10, "measurement_count": 2, "representative_depth_m": 0.85, "depth_gate_max_m": 1.5}])
 
 
